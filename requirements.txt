@@ -1,0 +1,6 @@
+watchdog
+google-generativeai
+python-dotenv
+pdfminer.six
+pikepdf
+tqdm

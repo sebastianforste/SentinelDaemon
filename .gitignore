@@ -1,11 +1,1 @@
-# Python
-__pycache__/
-*.py[cod]
-.venv/
-env/
-venv/
-.pytest_cache/
-
-# Environment
-.env
 .DS_Store
