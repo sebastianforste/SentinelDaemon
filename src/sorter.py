@@ -1,18 +1,19 @@
+import logging
 import os
 import shutil
-import logging
-import google.generativeai as genai
 from pathlib import Path
+
+import google.generativeai as genai
 from dotenv import load_dotenv
 
 # Load env from project root
 load_dotenv(Path(__file__).parent.parent / ".env")
 
-API_KEY = os.getenv("GEMINI_API_KEY")
+API_KEY = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
 if API_KEY:
     genai.configure(api_key=API_KEY)
 else:
-    logging.warning("GEMINI_API_KEY not found. AI sorting will be disabled.")
+    logging.warning("GEMINI_API_KEY / GOOGLE_API_KEY not found. AI sorting will be disabled.")
 
 DEVELOPER_DIR = Path(os.path.expanduser("~/Developer"))
 
@@ -29,7 +30,7 @@ def get_project_list():
 
 def sort_file(file_path: Path):
     """
-    Uses Gemini to determine the best folder for the file.
+    Uses Gemini 3 Flash to determine the best folder for the file.
     """
     if not API_KEY:
         return
@@ -40,25 +41,26 @@ def sort_file(file_path: Path):
         return
 
     filename = file_path.name
-    # Optional: Read first few bytes/lines if text to give context?
-    # For now, just sort based on filename to save tokens/complexity.
 
-    model = genai.GenerativeModel('gemini-flash-latest')
+    # Standardized 2026 Model
+    model = genai.GenerativeModel('models/gemini-3-flash-preview')
     
     prompt = f"""
-    I have a file named "{filename}".
-    I have the following project folders: {', '.join(projects)}.
+    You are a high-status sovereign logic engine.
+    Task: Classify this file into the most relevant project folder.
     
-    Based on the filename, which folder does this file belong to?
-    If it is a personal document, script, or specific to a project, choose the best match.
-    If it clearly doesn't belong to any, reply with "NONE".
+    FILE: "{filename}"
+    FOLDERS: {', '.join(projects)}
     
-    Reply ONLY with the exact folder name or "NONE".
+    CRITICAL PROTOCOLS:
+    1. Reply ONLY with the exact folder name.
+    2. If no folder matches perfectly, reply "NONE".
+    3. Do not explain your reasoning.
     """
 
     try:
         response = model.generate_content(prompt)
-        folder_name = response.text.strip()
+        folder_name = response.text.strip().replace("`", "").replace('"', '')
         
         if folder_name in projects:
             dest_dir = DEVELOPER_DIR / folder_name
@@ -72,9 +74,11 @@ def sort_file(file_path: Path):
                 dest_path = dest_dir / f"{file_path.stem}_{timestamp}{file_path.suffix}"
             
             shutil.move(str(file_path), str(dest_path))
-            logging.info(f"Moved to: {dest_path}")
+            logging.info(f"Successfully routed to: {dest_path.name}")
         else:
-            logging.info(f"AI could not classify {filename} (Response: {folder_name}). Leaving in Downloads.")
+            logging.info(
+                f"AI Classification: NONE for {filename}. Persistence: Original Directory."
+            )
 
     except Exception as e:
-        logging.error(f"AI Sorting failed: {e}")
+        logging.error(f"AI Sorting engine failure: {e}")

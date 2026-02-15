@@ -1,16 +1,15 @@
 # Sentinel Daemon
 
 ## Overview
-A background service that intelligently organizes your digital life.
-It watches folders (Downloads, Teams), processes files (OCR PDFs, Transcribe Audio), and uses AI to sort them into the correct project directories.
+Sentinel Daemon is an **Autonomous Intelligence Service** that organizes your digital life. It is a core component of the [2026 StrategyOS Ecosystem](file:///Users/sebastian/Developer/DEVELOPMENT_MANIFESTO_2026.md).
+
+It watches folders (Downloads, Teams), processes files (OCR PDFs via `ocr_rename`, Transcribe Audio), and uses Gemini-powered semantic analysis to sort them into project-specific directories.
 
 ## Features
-- **File Watching**: Monitors `~/Downloads` for new files in real-time using Watchdog
-- **Smart Debouncing**: Waits for downloads to complete before processing (prevents partial file processing)
-- **Concurrent Processing**: Uses ThreadPoolExecutor to handle multiple files simultaneously
-- **OCR Integration**: Automatically adds text layers to PDFs using `ocr_rename`
-- **AI Sorting**: Uses Gemini to analyze content and move files to destination folders
-- **Robust Error Handling**: Each file processed in isolation with comprehensive error logging
+- **File Watching**: Real-time monitoring of `~/Downloads` and `~/Desktop`.
+- **Intelligent Orchestration**: Chains `ocr_rename` for document layering and AI for classification.
+- **Smart Debouncing**: Ensures file integrity before processing.
+- **Concurrent Execution**: Multi-threaded processing for high-volume environments.
 
 ## Quick Start
 
